@@ -23,9 +23,24 @@ foreach ($users as $user) {
 if (!empty($_REQUEST['password']) and !empty($_REQUEST['login'])) {
     
     $login = trim($_REQUEST['login']);
-    $password = trim($_REQUEST['password']);
+    $password = password_hash(trim($_REQUEST['password']), PASSWORD_DEFAULT);
 
-    echo $login, $password;
+    $sql = 'SELECT login FROM users WHERE login=:login';
+    $stmt = $db->prepare($sql);
+    $stmt->execute(['login' => $login]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    
+
+    if (!$result) {
+        echo $login, ' ', $password, '<br>';
+
+        $query = $db->prepare('INSERT INTO `users` (`login`, `pass`) VALUES (:login, :pass)');
+        $query->execute([':login'=>$login, ':pass'=>$password]);    
+        
+    } else {
+        echo 'user ', $login, ' found!';
+    }
 }
 
 ?>
