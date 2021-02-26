@@ -33,7 +33,7 @@ if (!empty($_REQUEST['password']) and !empty($_REQUEST['login'])) {
     
 
     if (!$result) {
-        echo $login, ' ', $password, '<br>';
+        echo 'login: ', $login, '<br>password: ', $password;
 
         $query = $db->prepare('INSERT INTO `users` (`login`, `pass`) VALUES (:login, :pass)');
         $query->execute([':login'=>$login, ':pass'=>$password]);    
