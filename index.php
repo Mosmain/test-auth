@@ -1,46 +1,46 @@
-<?php header('Content-type: text/html; charset=utf-8'); 
+<?php 
+header('Content-type: text/html; charset=utf-8');
+session_start(); 
 require_once 'connect.php';
 
+// вывод всех пользователей
 $sql = "SELECT * FROM users";
-$result = $db->query($sql);
+$result = $pdo->query($sql);
 $users = $result->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($users as $user) {
-    echo "{$user['id']} {$user['login']} {$user['pass']}. <hr />";
+    echo "{$user['id']} {$user['login']} {$user['password']} <hr />";
 }
-
-// $sql = "INSERT INTO users (login, pass) VALUES (:login, :pass)";
-// $stmt = $db->prepare($sql);
-
-// $login = "kek";
-// $pass = "puk";
-
-// $stmt->bindValue(':login', $login);
-// $stmt->bindValue(':pass', $pass);
-// $stmt->execute();
 
 // проверка пустоты полей password и login
 if (!empty($_REQUEST['password']) and !empty($_REQUEST['login'])) {
     
+    // отсечение лишнего у login
     $login = trim($_REQUEST['login']);
+
+    // хеширование пароля
     $password = password_hash(trim($_REQUEST['password']), PASSWORD_DEFAULT);
 
-    $sql = 'SELECT login FROM users WHERE login=:login';
-    $stmt = $db->prepare($sql);
-    $stmt->execute(['login' => $login]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    // запись введенных данных
+    $data = [
+        'login' => $login,
+        'password' => $password
+    ];
 
-    
+    // выборка логина
+    $stmt = $pdo->prepare("SELECT * FROM `users` WHERE `login` = ?");
+    $stmt->execute(array($login));
+    $checkLogin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$result) {
-        echo 'login: ', $login, '<br>password: ', $password;
-
-        $query = $db->prepare('INSERT INTO `users` (`login`, `pass`) VALUES (:login, :pass)');
-        $query->execute([':login'=>$login, ':pass'=>$password]);    
-        
+    // проверка на существования логина в бд
+    if (empty($checkLogin)) {
+        echo 'not exists';
+        $sql = "INSERT INTO users (login, password) VALUES (:login, :password)";
+        $stmt = $pdo->prepare($sql)->execute($data);
     } else {
-        echo 'user ', $login, ' found!';
+        echo 'exists';
     }
+
 }
 
 ?>
