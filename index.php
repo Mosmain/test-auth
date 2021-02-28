@@ -30,6 +30,7 @@ if (isset($_POST['password']) and isset($_POST['login'])) {
         $sql = "INSERT INTO users (login, password) VALUES (:login, :password)";
         $stmt = $pdo->prepare($sql)->execute($data);
         $_SESSION["user"] = $login;
+        header('Location: login.php');
     } else {
         echo '<div class="alert alert-danger m-2" role="alert">
                 Пользователь уже существует!
