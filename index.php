@@ -26,7 +26,6 @@ if (isset($_POST['password']) and isset($_POST['login'])) {
 
     // проверка на существования логина в бд
     if (empty($checkLogin)) {
-        echo 'not exists';
         $sql = "INSERT INTO users (login, password) VALUES (:login, :password)";
         $stmt = $pdo->prepare($sql)->execute($data);
         $_SESSION["user"] = $login;
@@ -37,7 +36,6 @@ if (isset($_POST['password']) and isset($_POST['login'])) {
               </div>';
     }
 }
-
 
 // вывод всех пользователей
 $sql = "SELECT * FROM users";
@@ -105,10 +103,11 @@ foreach ($users as $user) {
             <input name='password' type='password' placeholder='Password'>
             <input type='submit' value='Отправить'>
         </form>
+        <p>go to <a href="login.php">login.php</a></p>
     </div>
     <div id="login">
         <h3>Login</h3>
-        <form action='index.php' method='POST'>
+        <form action='login.php' method='POST'>
             <input name='login' placeholder='Login'>
             <input name='password' type='password' placeholder='Password'>
             <input type='submit' value='Отправить'>
@@ -119,6 +118,13 @@ foreach ($users as $user) {
 <?php else: ?>
 
 <p>Wanna <a href="logout.php">exit</a>?</p>
-<p>you session is <?php $_SESSION['user']; ?></p>
+
+<p>go to <a href="login.php">login.php</a></p>
+
+<? if(isset($_SESSION['user'])): ?>
+    <p>name you session is <?php echo $_SESSION['user']; ?></p>
+<? else: ?>
+    <p>your session is <b>broken!</b></p>
+<? endif; ?>
 
 <?php endif; ?>
