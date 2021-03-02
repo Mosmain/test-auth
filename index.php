@@ -29,7 +29,7 @@ if (isset($_POST['password']) and isset($_POST['login'])) {
         $sql = "INSERT INTO users (login, password) VALUES (:login, :password)";
         $stmt = $pdo->prepare($sql)->execute($data);
         $_SESSION["user"] = $login;
-        header('Location: login.php');
+        // header('Location: login.php');
     } else {
         echo '<div class="alert alert-danger m-2" role="alert">
                 Пользователь уже существует!
@@ -45,6 +45,35 @@ $users = $result->fetchAll(PDO::FETCH_ASSOC);
 foreach ($users as $user) {
     echo "<p class='m-2'>{$user['id']} {$user['login']} {$user['password']}</p><hr class='m-2'>";
 }
+
+
+$path = 'upload/';
+$permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST')
+{
+    // расширение файла по-умному
+    $pathinfo = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
+
+    // расширение файла как обычно
+    // $pathinfo = strrchr($_FILES['picture']['name'], '.');
+
+    $photoName = substr(str_shuffle($permitted_chars), 0, 20). '.' . $pathinfo;
+
+    if (!@copy($_FILES['picture']['tmp_name'], $path . $photoName))
+        echo 'Что-то пошло не так';
+    else
+        echo 'Загрузка удачна<br>';
+        echo 'путь = ', $path . $_FILES['picture']['name'], '<br>';
+        echo 'name = ', $_FILES['picture']['name'], '<br>';
+        echo 'type = ', $_FILES['picture']['type'], '<br>';
+        echo 'size = (', $_FILES['picture']['size'], '/1048576)<br>';
+        echo 'tmp_name = ', $_FILES['picture']['tmp_name'], '<br>';
+        echo 'error = ', $_FILES['picture']['error'], '<br>';
+        echo 'file = ', strrchr($_FILES['picture']['name'], '.');
+        
+}
+
 
 ?>
 
@@ -98,10 +127,11 @@ foreach ($users as $user) {
 
     <div id="register">
         <h3>Register</h3>
-        <form method='POST'>
+        <form method='POST' enctype="multipart/form-data">
             <input name='login' placeholder='Login'>
             <input name='password' type='password' placeholder='Password'>
-            <input type='submit' value='Отправить'>
+            <input type='submit' value='Отправить'><br> 
+            <input name="picture" type="file" />
         </form>
         <p>go to <a href="login.php">login.php</a></p>
     </div>
