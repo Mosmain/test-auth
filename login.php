@@ -47,14 +47,14 @@ if (isset($_POST['password']) and isset($_POST['login'])) {
 <? if (isset($_SESSION['user'])): ?>
 
     <h1>Session name <?php echo $_SESSION['user']; ?></h1>
-    <p>Wanna go <a href="/test-auth">back</a>?</p>
+    <p>Wanna go <a href="index.php">back</a>?</p>
     <p>Wanna <a href="logout.php">exit</a>?</p>
 
 <? else: ?>
 
     <h1>Session <b>broken!</b></h1>
     <p>you dont have permissions</p>
-    <p>Wanna go <a href="/test-auth">back</a>?</p>
+    <p>Wanna go <a href="index.php">back</a>?</p>
 
 <? endif; ?>
 
