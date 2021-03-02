@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
         echo 'tmp_name = ', $_FILES['picture']['tmp_name'], '<br>';
         echo 'error = ', $_FILES['picture']['error'], '<br>';
         echo 'file = ', strrchr($_FILES['picture']['name'], '.');
-        
+
 }
 
 
