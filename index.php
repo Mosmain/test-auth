@@ -3,9 +3,11 @@ header('Content-type: text/html; charset=utf-8');
 require_once 'connect.php';
 session_start();
 
+$path = 'upload/';
+$permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 // проверка пустоты полей password и login
-if (isset($_POST['password']) and isset($_POST['login'])) {
+if (isset($_POST['password']) and isset($_POST['login']) and !empty($_FILES['picture']['name'])) {
 
     // отсечение лишнего у login
     $login = trim($_POST['login']);
@@ -29,60 +31,84 @@ if (isset($_POST['password']) and isset($_POST['login'])) {
         $sql = "INSERT INTO users (login, password) VALUES (:login, :password)";
         $stmt = $pdo->prepare($sql)->execute($data);
         $_SESSION["user"] = $login;
+
+
+        // // if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        // // расширение файла по-умному
+        // $pathinfo = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
+
+        // // расширение файла как обычно
+        // // $pathinfo = strrchr($_FILES['picture']['name'], '.');
+
+        // // название фото = названиеФото.расширение
+        // $photoName = substr(str_shuffle($permitted_chars), 0, 20). '.' . $pathinfo;
+
+        // if (!@copy($_FILES['picture']['tmp_name'], $path . $photoName)) {
+        //     echo 'Что-то пошло не так';
+        // } else {
+        //     echo 'Загрузка удачна<br>';
+        //     echo 'путь = ', $path . $photoName, '<br>';
+        //     echo 'name = ', $_FILES['picture']['name'], '<br>';
+        //     echo 'type = ', $_FILES['picture']['type'], '<br>';
+        //     echo 'size = (', $_FILES['picture']['size'], '/1048576)<br>';
+        //     echo 'tmp_name = ', $_FILES['picture']['tmp_name'], '<br>';
+        //     echo 'error = ', $_FILES['picture']['error'], '<br>';
+        //     echo 'file = ', strrchr($_FILES['picture']['name'], '.');
+        // }
         // header('Location: login.php');
     } else {
         echo '<div class="alert alert-danger m-2" role="alert">
                 Пользователь уже существует!
               </div>';
     }
+
 }
 
-// вывод всех пользователей
-$sql = "SELECT * FROM users";
-$result = $pdo->query($sql);
-$users = $result->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($users as $user) {
-    echo "<p class='m-2'>{$user['id']} {$user['login']} {$user['password']}</p><hr class='m-2'>";
-}
-
-
-$path = 'upload/';
-$permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST')
-{
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // расширение файла по-умному
     $pathinfo = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
 
     // расширение файла как обычно
     // $pathinfo = strrchr($_FILES['picture']['name'], '.');
 
+    // название фото = названиеФото.расширение
     $photoName = substr(str_shuffle($permitted_chars), 0, 20). '.' . $pathinfo;
 
-    if (!@copy($_FILES['picture']['tmp_name'], $path . $photoName))
+    if ($_FILES['picture']['size'] <= 1024*1024) {
+        echo 'File done!<br>';
+        echo 'size = (', $_FILES['picture']['size'], '/' . (1024*1024) . ')<br>';
+    } else {
+        echo 'File to weight!<br>';
+        echo 'size = (', $_FILES['picture']['size'], '/' . (1024*1024) . ')<br>';
+    }
+
+    if (!@copy($_FILES['picture']['tmp_name'], $path . $photoName)) {
         echo 'Что-то пошло не так';
-    else
+    } else {
         echo 'Загрузка удачна<br>';
-        echo 'путь = ', $path . $_FILES['picture']['name'], '<br>';
+        echo 'путь = ', $path . $photoName, '<br>';
         echo 'name = ', $_FILES['picture']['name'], '<br>';
         echo 'type = ', $_FILES['picture']['type'], '<br>';
         echo 'size = (', $_FILES['picture']['size'], '/1048576)<br>';
         echo 'tmp_name = ', $_FILES['picture']['tmp_name'], '<br>';
         echo 'error = ', $_FILES['picture']['error'], '<br>';
         echo 'file = ', strrchr($_FILES['picture']['name'], '.');
+    }
 }
 
+
+// вывод всех пользователей
+$sql = "SELECT * FROM users";
+$result = $pdo->query($sql);
+$users = $result->fetchAll(PDO::FETCH_ASSOC);
+
+// foreach ($users as $user) {
+//     echo "<p class='m-2'>{$user['id']} {$user['login']} {$user['password']}</p><hr class='m-2'>";
+// }
 
 ?>
 
 <?php if (!isset($_SESSION['user'])): ?>
-
-<!-- <form action='index.php' method='POST'>
-    <input name='login'>
-    <input name='password' type='password'>
-    <input type='submit' value='Отправить'>
-</form> -->
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -127,10 +153,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
     <div id="register">
         <h3>Register</h3>
         <form method='POST' enctype="multipart/form-data">
-            <input name='login' placeholder='Login'>
-            <input name='password' type='password' placeholder='Password'>
-            <input type='submit' value='Отправить'><br> 
-            <input name="picture" type="file" />
+            <input name='login' placeholder='Login' required />
+            <input name='password' type='password' placeholder='Password' required />
+            <input type='submit' value='Отправить'><br>
+            <input name="picture" type="file" required />
         </form>
         <p>go to <a href="login.php">login.php</a></p>
     </div>

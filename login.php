@@ -22,7 +22,7 @@ if (isset($_POST['password']) and isset($_POST['login'])) {
     // проверка на существования логина в бд
     if (($check['login'] == $login) and (password_verify($_POST['password'], $check['password']))) {
         $_SESSION["user"] = $login;
-        
+
         echo password_verify($_POST['password'], $password);
         echo $_POST['password'], '<br>';
         echo $check['password'];
