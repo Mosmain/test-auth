@@ -1,7 +1,10 @@
 <?php
 header('Content-type: text/html; charset=utf-8');
 require_once 'connect.php';
+require_once 'avatar.php';
 session_start();
+
+$a = 4;
 
 $path = 'upload/';
 $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -63,7 +66,7 @@ if (isset($_POST['password']) and isset($_POST['login']) and !empty($_FILES['pic
     }
 
 }
-
+echo strrchr('doily.ua.com', '.');
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // расширение файла по-умному
     $pathinfo = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
@@ -86,13 +89,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo 'Что-то пошло не так';
     } else {
         echo 'Загрузка удачна<br>';
-        echo 'путь = ', $path . $photoName, '<br>';
-        echo 'name = ', $_FILES['picture']['name'], '<br>';
-        echo 'type = ', $_FILES['picture']['type'], '<br>';
-        echo 'size = (', $_FILES['picture']['size'], '/1048576)<br>';
-        echo 'tmp_name = ', $_FILES['picture']['tmp_name'], '<br>';
-        echo 'error = ', $_FILES['picture']['error'], '<br>';
-        echo 'file = ', strrchr($_FILES['picture']['name'], '.');
+        // echo 'путь = ', $path . $photoName, '<br>';
+        // echo 'name = ', $_FILES['picture']['name'], '<br>';
+        // echo 'type = ', $_FILES['picture']['type'], '<br>';
+        // echo 'size = (', $_FILES['picture']['size'], '/1048576)<br>';
+        // echo 'tmp_name = ', $_FILES['picture']['tmp_name'], '<br>';
+        // echo 'error = ', $_FILES['picture']['error'], '<br>';
+        // echo 'file = ', strrchr($_FILES['picture']['name'], '.');
+        var_dump($_FILES['picture']);
     }
 }
 
