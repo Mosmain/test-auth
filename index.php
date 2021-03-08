@@ -18,10 +18,37 @@ if (isset($_POST['password']) and isset($_POST['login']) and !empty($_FILES['pic
     // хеширование пароля
     $password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
 
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        // расширение файла по-умному
+        $pathinfo = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
+
+        // расширение файла как обычно
+        // $pathinfo = strrchr($_FILES['picture']['name'], '.');
+
+        // название фото = названиеФото.расширение
+        $photoName = substr(str_shuffle($permitted_chars), 0, 20). '.' . $pathinfo;
+
+        if (!@copy($_FILES['picture']['tmp_name'], $path . $photoName)) {
+            echo 'Что-то пошло не так';
+        } else {
+            echo 'Загрузка удачна<br>';
+            echo 'путь = ', $path . $photoName, '<br>';
+            echo 'name = ', $_FILES['picture']['name'], '<br>';
+            echo 'type = ', $_FILES['picture']['type'], '<br>';
+            echo 'size = (', $_FILES['picture']['size'], '/1048576)<br>';
+            echo 'tmp_name = ', $_FILES['picture']['tmp_name'], '<br>';
+            echo 'error = ', $_FILES['picture']['error'], '<br>';
+            echo 'file = ', strrchr($_FILES['picture']['name'], '.');
+
+            $avatar = $path . $photoName;
+        }
+    }
+
     // запись введенных данных
     $data = [
         'login' => $login,
-        'password' => $password
+        'password' => $password,
+        'avatar' => $avatar
     ];
 
     // выборка логина
@@ -31,33 +58,10 @@ if (isset($_POST['password']) and isset($_POST['login']) and !empty($_FILES['pic
 
     // проверка на существования логина в бд
     if (empty($checkLogin)) {
-        $sql = "INSERT INTO users (login, password) VALUES (:login, :password)";
+        $sql = "INSERT INTO users (login, password, avatar) VALUES (:login, :password, :avatar)";
         $stmt = $pdo->prepare($sql)->execute($data);
         $_SESSION["user"] = $login;
 
-
-        // // if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        // // расширение файла по-умному
-        // $pathinfo = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
-
-        // // расширение файла как обычно
-        // // $pathinfo = strrchr($_FILES['picture']['name'], '.');
-
-        // // название фото = названиеФото.расширение
-        // $photoName = substr(str_shuffle($permitted_chars), 0, 20). '.' . $pathinfo;
-
-        // if (!@copy($_FILES['picture']['tmp_name'], $path . $photoName)) {
-        //     echo 'Что-то пошло не так';
-        // } else {
-        //     echo 'Загрузка удачна<br>';
-        //     echo 'путь = ', $path . $photoName, '<br>';
-        //     echo 'name = ', $_FILES['picture']['name'], '<br>';
-        //     echo 'type = ', $_FILES['picture']['type'], '<br>';
-        //     echo 'size = (', $_FILES['picture']['size'], '/1048576)<br>';
-        //     echo 'tmp_name = ', $_FILES['picture']['tmp_name'], '<br>';
-        //     echo 'error = ', $_FILES['picture']['error'], '<br>';
-        //     echo 'file = ', strrchr($_FILES['picture']['name'], '.');
-        // }
         // header('Location: login.php');
     } else {
         echo '<div class="alert alert-danger m-2" role="alert">
@@ -66,7 +70,7 @@ if (isset($_POST['password']) and isset($_POST['login']) and !empty($_FILES['pic
     }
 
 }
-echo strrchr('doily.ua.com', '.');
+// echo strrchr('doily.ua.com', '.');
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // расширение файла по-умному
     $pathinfo = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
@@ -106,9 +110,9 @@ $sql = "SELECT * FROM users";
 $result = $pdo->query($sql);
 $users = $result->fetchAll(PDO::FETCH_ASSOC);
 
-// foreach ($users as $user) {
-//     echo "<p class='m-2'>{$user['id']} {$user['login']} {$user['password']}</p><hr class='m-2'>";
-// }
+foreach ($users as $user) {
+    echo "<p class='m-2'>{$user['id']} {$user['login']} {$user['password']} <img style='width:50px;' src='{$user['avatar']}'></p><hr class='m-2'>";
+}
 
 ?>
 
@@ -163,6 +167,9 @@ $users = $result->fetchAll(PDO::FETCH_ASSOC);
             <input name="picture" type="file" required />
         </form>
         <p>go to <a href="login.php">login.php</a></p>
+        <form action='debug.php' method="POST">
+            <input type="submit" name="clear" value="clear users" />
+        </form>
     </div>
     <div id="login">
         <h3>Login</h3>
